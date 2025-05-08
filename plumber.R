@@ -19,13 +19,37 @@ function(){ list(msg = "pong") }
 #* @serializer json
 function(age, bmi, smoking, activity, alcohol, diet){
 
+  # Explicit type conversion for robustness and debugging
+  age <- as.integer(age)
+  bmi <- as.numeric(bmi)
+  smoking <- as.integer(smoking)
+  activity <- as.integer(activity)
+  alcohol <- as.integer(alcohol)
+  diet <- as.integer(diet)
+
+  print(paste("Value of age param after conversion:", age))
+  print(paste("Type of age param after conversion:", typeof(age)))
+
   score <- (smoking == 1) +
            (bmi >= 18.5 & bmi <= 24.9) +
            (activity >= 150) +
            (alcohol <= 14) +
            (diet == 1)
+  
+  print(paste("Value of score:", score))
+  print(paste("Type of score:", typeof(score)))
+  char_score <- as.character(score)
+  print(paste("Character score for lookup:", char_score))
 
-  delta <- score_to_delta[as.character(score)]
+  delta <- score_to_delta[char_score]
+
+  print(paste("Value of delta from lookup:", delta))
+  print(paste("Type of delta:", typeof(delta)))
+  print(paste("Is delta NA?:", is.na(delta)))
+
+  # If delta is NA, it might cause issues in arithmetic or JSON serialization
+  # For now, the error is "non-numeric argument", let's see if above fixes it.
+  # If delta becomes NA, age + NA will be NA. If the serializer has issues with NA, that's another step.
 
   list(
     lifestyle_age = age + delta,
