@@ -1,0 +1,71 @@
+name: R API CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release' # Or specify a version
+
+      - name: Install lintr
+        run: R -e "install.packages('lintr')"
+
+      - name: Lint R code
+        run: R -e "lintr::lint_dir(exclusions = list('.github'))" # Exclude the workflow dir itself
+
+      - name: Build Docker image
+        run: docker build . --file Dockerfile --tag my-r-api:$(date +%s)
+
+  deploy-to-railway: # Example placeholder for Railway
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production # Optional: if you have a GitHub environment set up
+      url: ${{ steps.deploy.outputs.url }} # Optional: to display the deployment URL
+    steps:
+      - uses: actions/checkout@v3
+      # Example using Railway CLI - you'd need to set up RAILWAY_TOKEN secret
+      # - name: Install Railway CLI
+      #   run: npm install -g @railway/cli
+      # - name: Deploy to Railway
+      #   id: deploy
+      #   run: |
+      #     railway login --token ${{ secrets.RAILWAY_TOKEN }}
+      #     railway up --service YOUR_RAILWAY_SERVICE_NAME --detach
+      #     # railway status # to get deployment URL, needs parsing
+      #     # echo "::set-output name=url::YOUR_DEPLOYMENT_URL"
+      - name: Placeholder Deploy Step
+        run: echo "Deployment to Railway would happen here using secrets.RAILWAY_TOKEN"
+
+  deploy-to-fly: # Example placeholder for Fly.io
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production # Optional
+      url: ${{ steps.deploy.outputs.url }} # Optional
+    steps:
+      - uses: actions/checkout@v3
+      # Example using Fly.io CLI - you'd need to set up FLY_API_TOKEN secret
+      # - uses: superfly/flyctl-actions/setup-flyctl@master
+      # - name: Deploy to Fly.io
+      #   id: deploy
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      #   run: |
+      #     flyctl deploy --remote-only --app YOUR_FLY_APP_NAME
+      #     # Deployment URL is usually predictable or output by flyctl status
+      #     # echo "::set-output name=url::https://YOUR_FLY_APP_NAME.fly.dev"
+      - name: Placeholder Deploy Step
+        run: echo "Deployment to Fly.io would happen here using secrets.FLY_API_TOKEN" 
