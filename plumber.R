@@ -2,7 +2,7 @@
 library(plumber)
 
 # Helper: convert Lifestyle Score → age delta
-score_to_delta <- c(`0` = 6, 1 = 3, 2 = 1, 3 = -1, 4 = -3, 5 = -5)
+score_to_delta <- c(`0` = 6, `1` = 3, `2` = 1, `3` = -1, `4` = -3, `5` = -5)
 
 #* Health-check
 #* @get /ping
